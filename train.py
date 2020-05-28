@@ -74,10 +74,10 @@ elif args.energy_func == "diff_covar": ##################### different covarianc
 elif args.energy_func == "diff_mean": ##################### different mean
     n, d = args.data_num, 2
     X = np.random.rand(n, d)*3
-    initial = torch.zeros(args.sample_num,d).to(device)
+    initial = torch.from_numpy(X.mean(axis=0)).float().to(device).unsqueeze(0).repeat(args.sample_num,1)
     energy = energy3
 
-
+initial.requires_grad_(True)
 start = time.time()
 output = SGHMC(energy = energy, 
                 data = X,
@@ -95,7 +95,7 @@ res = []
 for _res in output:
     res += [_res.cpu().numpy()]
 
-save_name = "/result/" + args.optimizer + "_batch_size_" + str(args.batch_size)  + "_lr_" + args.lr + ".npy"
+save_name = "result/" + args.optimizer + "_batch_size_" + str(args.batch_size)  + "_lr_" + str(args.lr) + ".npy"
 np.save(save_name, res) 
 
 print (np.linalg.inv(np.cov(res[-1].T)))

@@ -64,6 +64,9 @@ def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, 
             
         if _out%10 == 0:
             checkpoints += [q.clone().detach()]
+        if _out%100 == 0:
+            res = q.clone().detach().cpu().numpy()
+            print ("out_epoch: ", _out, " Covariance: ", np.linalg.inv(np.cov(res.T)))
         
     torch.set_grad_enabled(True)
 
