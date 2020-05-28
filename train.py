@@ -3,7 +3,7 @@ import numpy as numpy
 import torch
 from torch.autograd import grad as torchgrad
 from Sto_HMC import SGHMC
-
+import argparse
 
 parser = argparse.ArgumentParser(description='train stochastic HMC')
 parser.add_argument('--sample_num', default = 2000,
@@ -20,9 +20,9 @@ parser.add_argument("--lr", default = 2e-5,
                     help = "learning rate")
 parser.add_argument("--optimizer", default = "SG",
                     help = "optimizer")
-parser.add_argument("--batch_size", defult = 8,
+parser.add_argument("--batch_size", default = 8,
                     help = "batch size")
-parser.add_argument("--enable_MH", defult = False,
+parser.add_argument("--enable_MH", default = False,
                     help = "enable metropolis hasting")
 args = parser.parse_args()
 
@@ -30,25 +30,6 @@ if torch.cuda.is_available():
     device = "cuda" 
 else: 
     device="cpu"
-
-if parser.energy_func == "diff_var": ##################### different variance
-    n, d = args.data_num, 1
-    X = np.random.rand(n, d)*10+1
-    energy = energy1
-    initial = torch.zeros(args.sample_num,d).to(device)
-elif parser.energy_func == "diff_covar": ##################### different covariance
-    d = 2
-    X = np.ones([args.data_num, d, d])
-    Y = np.asarray([[1, 0.7], [0.7, 1]])
-    for i in range(args.data_num):
-        X[i, :, :] = Y + np.random.randn(d,d)
-    energy = energy2
-    initial = torch.zeros(args.sample_num,d).to(device)+1.5
-elif parser.energy_func == "diff_mean": ##################### different mean
-    n, d = args.data_num, 2
-    X = np.random.rand(n, d)*3
-    initial = torch.zeros(args.sample_num,d).to(device)
-    energy = energy3
 
 
 def energy1(q, data):
@@ -74,7 +55,24 @@ def energy3(q, data):
     
     return all_energy
 
-
+if args.energy_func == "diff_var": ##################### different variance
+    n, d = args.data_num, 1
+    X = np.random.rand(n, d)*10+1
+    energy = energy1
+    initial = torch.zeros(args.sample_num,d).to(device)
+elif args.energy_func == "diff_covar": ##################### different covariance
+    d = 2
+    X = np.ones([args.data_num, d, d])
+    Y = np.asarray([[1, 0.7], [0.7, 1]])
+    for i in range(args.data_num):
+        X[i, :, :] = Y + np.random.randn(d,d)
+    energy = energy2
+    initial = torch.zeros(args.sample_num,d).to(device)+1.5
+elif args.energy_func == "diff_mean": ##################### different mean
+    n, d = args.data_num, 2
+    X = np.random.rand(n, d)*3
+    initial = torch.zeros(args.sample_num,d).to(device)
+    energy = energy3
 
 start = time.time()
 output_HMC = SGHMC(energy = energy, 
