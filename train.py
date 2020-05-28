@@ -1,9 +1,10 @@
 import random
-import numpy as numpy
+import numpy as np
 import torch
 from torch.autograd import grad as torchgrad
 from Sto_HMC import SGHMC
 import argparse
+import time
 
 parser = argparse.ArgumentParser(description='train stochastic HMC')
 parser.add_argument('--sample_num', default = 2000,
@@ -25,6 +26,8 @@ parser.add_argument("--batch_size", default = 8,
 parser.add_argument("--enable_MH", default = False,
                     help = "enable metropolis hasting")
 args = parser.parse_args()
+print (args)
+
 
 if torch.cuda.is_available():
     device = "cuda" 
@@ -43,7 +46,7 @@ def energy2(q, data):
     return all_energy
 def energy3(q, data):
     
-    n, N = args.data_num, args.sample_num
+    n, N = data.shape[0], args.sample_num
     cov = np.asarray([[1,1], [1,2]])
     cov =  torch.from_numpy(cov).float().to(device)
     cov_expand1 = (cov.T).unsqueeze(0).repeat(n, 1,1)
@@ -74,8 +77,9 @@ elif args.energy_func == "diff_mean": ##################### different mean
     initial = torch.zeros(args.sample_num,d).to(device)
     energy = energy3
 
+
 start = time.time()
-output_HMC = SGHMC(energy = energy, 
+output = SGHMC(energy = energy, 
                 data = X,
                 batch_size = args.batch_size,
                 initial = initial,
@@ -86,4 +90,12 @@ output_HMC = SGHMC(energy = energy,
                 optimizer = args.optimizer,
                 enable_MH = args.enable_MH
                  )  
-print ("SG Run time: ", time.time()-start)
+print (args.optimizer, " Run time: ", time.time()-start)
+res = []
+for _res in output:
+    res += [_res.cpu().numpy()]
+
+save_name = "/result/" + args.optimizer + "_batch_size_" + str(args.batch_size)  + "_lr_" + args.lr + ".npy"
+np.save(save_name, res) 
+
+print (np.linalg.inv(np.cov(res[-1].T)))

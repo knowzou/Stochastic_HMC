@@ -1,5 +1,5 @@
 import random
-import numpy as numpy
+import numpy as np
 import torch
 from torch.autograd import grad as torchgrad
 

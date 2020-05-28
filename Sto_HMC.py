@@ -25,7 +25,7 @@ def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, 
     torch.set_grad_enabled(True)
     g = grad(energy, q.requires_grad_(), param_ref)
     E = energy(q, data)*n
-    print (g)
+    # print (g)
     torch.set_grad_enabled(False)
     
     for _out in range(out_epochs):
