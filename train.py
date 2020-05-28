@@ -7,23 +7,23 @@ import argparse
 import time
 
 parser = argparse.ArgumentParser(description='train stochastic HMC')
-parser.add_argument('--sample_num', default = 2000,
+parser.add_argument('--sample_num', type=int, default = 2000,
                     help='number of generated samples')
-parser.add_argument('--data_num', default = 200,
+parser.add_argument('--data_num', type=int, default = 200,
                     help='number of training data')
 parser.add_argument('--energy_func', default = "diff_mean",
                     help='type of target density')
-parser.add_argument("--out_epochs", default = 2000,
+parser.add_argument("--out_epochs", type=int, default = 2000,
                     help = "outer epochs")
-parser.add_argument("--in_epochs", default = 100,
+parser.add_argument("--in_epochs", type=int, default = 100,
                     help = "inner epochs")
-parser.add_argument("--lr", default = 2e-5,
+parser.add_argument("--lr", type=float, default = 2e-5,
                     help = "learning rate")
 parser.add_argument("--optimizer", default = "SG",
                     help = "optimizer")
-parser.add_argument("--batch_size", default = 8,
+parser.add_argument("--batch_size", type=int, default = 8,
                     help = "batch size")
-parser.add_argument("--enable_MH", default = False,
+parser.add_argument("--enable_MH", type=bool, default = False,
                     help = "enable metropolis hasting")
 args = parser.parse_args()
 print (args)
