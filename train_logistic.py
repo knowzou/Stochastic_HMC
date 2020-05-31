@@ -12,6 +12,8 @@ from Optimizer import Gradient
 parser = argparse.ArgumentParser(description='train stochastic HMC')
 parser.add_argument('--sample_num', type=int, default = 2000,
                     help='number of generated samples')
+parser.add_argument('--data_num', type=int, default = 500,
+                    help='number of data')
 parser.add_argument('--data_set',  default = "Pima",
                     help='number of training data')
 parser.add_argument('--energy_func', default = "diff_mean",
@@ -63,15 +65,40 @@ if args.data_set == "Pima":
     eta = 0.001
     for _ in range(10000):
         beta = beta - eta*args.prior*2*beta  - eta*opt.SG(logistic, beta.requires_grad_(), True)
-
     initial = beta.repeat(args.sample_num, 1)
+
+
+if args.data_set == "Covtype":
+    if args.data_num == 500 or args.data_num == 500 or args.data_num == 5000:
+        file_name = "data/covtype" + str(args.data_num) + ".npy"
+        data = np.load(file_name)
+    else:
+        data = np.load("data/covtypeall.npy")
+        rand_ind = random.sample(range(data.shape[0]), args.data_num)
+        data = data[rand_ind,:]
+
+    n, d = data.shape
+    print(n, d)
+    feature, label = data, data[0:, [-1]]
+    feature[:, -1] = np.ones([n])
+    feature = feature / (np.abs(feature).max(axis=0)+0.01)
+    feature = feature * label
+    X = feature
+    beta = torch.from_numpy(X.mean(axis=0)).float().to(device).unsqueeze(0)
+    opt = Gradient(X, 500)
+    eta = 0.0001
+    for _ in range(10000):
+        beta = beta - eta*args.prior*2*beta  - eta*opt.SG(logistic, beta.requires_grad_(), True)
+    initial = beta.repeat(args.sample_num, 1) -0.05
+
+    print (initial)
 
 
 batch_size = n if args.enable_MH else args.batch_size
 
 initial.requires_grad_(True)
 start = time.time()
-output = SGHMC(energy = logistic, 
+log, output = SGHMC(energy = logistic, 
                 data = X,
                 batch_size = batch_size,
                 initial = initial,
@@ -85,13 +112,14 @@ output = SGHMC(energy = logistic,
                  )  
 print (args.optimizer, " Run time: ", time.time()-start)
 res = []
-for _res in output:
-    res += [_res.cpu().numpy()]
+for _res in log:
+    res += [_res]
 
 save_name = "result/" + args.data_set + "_" + args.optimizer + "_batch_size_" + str(args.batch_size)  + "_lr_" + str(args.lr) + ".npy"
 np.save(save_name, res) 
-
-print (np.linalg.inv(np.cov(res[-1].T)))
+save_name_mean = "result/" + args.data_set + "_mean_" + str(args.data_num) + ".npy"
+np.save(save_name_mean, output)
+# print (np.linalg.inv(np.cov(res[-1].T)))
 
 
 

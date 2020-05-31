@@ -88,7 +88,7 @@ initial.requires_grad_(True)
 # for ind in range(10):
 #     print ("Alg: ", args.optimizer, " training index: ", ind)
 start = time.time()
-output = SGHMC(energy = energy, 
+log, output = SGHMC(energy = energy, 
                 data = X,
                 batch_size = args.batch_size,
                 initial = initial,
@@ -102,7 +102,7 @@ output = SGHMC(energy = energy,
 print (args.optimizer, " Run time: ", time.time()-start)
 res = []
 for _res in output:
-    res += [_res.cpu().numpy()]
+    res += [_res]
 
 save_name = "result/" + args.optimizer + "_batch_size_" + str(args.batch_size)  + "_lr_" + str(args.lr)  + ".npy"
 np.save(save_name, res) 

@@ -6,11 +6,12 @@ from Optimizer import Gradient
 
 
 def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, optimizer, prior=0, enable_MH=True):
-    checkpoints = []
+    checkpoints, output = [], []
     
     
     opt = Gradient(data, batch_size)
-    param_ref = initial.clone() + 1.5
+    param_ref = initial.clone() + 0.0495
+    true_param = initial.clone().detach().cpu().numpy() + 0.05
     if optimizer == "SG":
         grad = opt.SG
     elif optimizer == "CVG":
@@ -62,14 +63,21 @@ def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, 
             q = q_new
             g = g_new
             
-        if _out%10 == 0:
-            checkpoints += [q.clone().detach()]
+        if _out%10 == 0: 
+
+            res = q.clone().detach().cpu().numpy()
+            output += [res.mean(axis=0)]
+
+            mse = np.sqrt(((res.mean(axis=0) - true_param)**2).sum())
+            likelihood = energy(q.clone().mean(axis=0).unsqueeze(0), data).detach().cpu().numpy()
+            checkpoints += [mse, likelihood]
         if _out%100 == 0:
             res = q.clone().detach().cpu().numpy()
             # print ("out_epoch: ", _out, " Covariance: ", np.cov(res.T)*500)
-            print ("out_epoch: ", _out, " Mean: ", res.mean(axis=0))#, " mean energy: ", \
+            # print ("out_epoch: ", _out, " Mean: ", res.mean(axis=0))#, " mean energy: ", \
             #  energy(q.clone().mean(axis=0).unsqueeze(0), data))
+            print ("out_epoch: ", _out, " MSE: ", mse, " Likelihood: ", likelihood)
         
     torch.set_grad_enabled(True)
 
-    return checkpoints
+    return checkpoints, output
