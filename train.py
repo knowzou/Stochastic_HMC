@@ -72,12 +72,21 @@ elif args.energy_func == "diff_covar": ##################### different covarianc
     energy = energy2
     initial = torch.zeros(args.sample_num,d).to(device)+1.5
 elif args.energy_func == "diff_mean": ##################### different mean
-    n, d = args.data_num, 2
-    X = np.random.rand(n, d)*3
-    initial = torch.from_numpy(X.mean(axis=0)).float().to(device).unsqueeze(0).repeat(args.sample_num,1)
+    if args.data_num == 500:
+        X = np.load("data/syn500.npy")
+    elif args.data_num == 5000:
+        X = np.load("data/syn5000.npy")
+    initial = torch.from_numpy(X.mean(axis=0)).float().to(device).unsqueeze(0).repeat(args.sample_num,1)-1.5
+
+    print (initial + 1.5)
+
     energy = energy3
 
+
+
 initial.requires_grad_(True)
+# for ind in range(10):
+#     print ("Alg: ", args.optimizer, " training index: ", ind)
 start = time.time()
 output = SGHMC(energy = energy, 
                 data = X,
@@ -95,7 +104,7 @@ res = []
 for _res in output:
     res += [_res.cpu().numpy()]
 
-save_name = "result/" + args.optimizer + "_batch_size_" + str(args.batch_size)  + "_lr_" + str(args.lr) + ".npy"
+save_name = "result/" + args.optimizer + "_batch_size_" + str(args.batch_size)  + "_lr_" + str(args.lr)  + ".npy"
 np.save(save_name, res) 
 
-print (np.linalg.inv(np.cov(res[-1].T)))
+# print (np.linalg.inv(np.cov(res[-1].T)))

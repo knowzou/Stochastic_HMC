@@ -10,7 +10,7 @@ class Gradient(object):
         self.random_seed = random_seed
         self.n = data.shape[0]
         self.p = data.shape[1]
-        self.svrg_epoch_length = svrg_epoch_length
+        self.svrg_epoch_length = data.shape[0] // batch_size
         self.svrg_count = 0
         self.epoch_count = 0
         

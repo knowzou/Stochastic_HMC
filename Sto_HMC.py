@@ -5,12 +5,12 @@ import torch
 from Optimizer import Gradient
 
 
-def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, optimizer, enable_MH=True):
+def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, optimizer, prior=0, enable_MH=True):
     checkpoints = []
     
     
     opt = Gradient(data, batch_size)
-    param_ref = initial
+    param_ref = initial.clone() + 1.5
     if optimizer == "SG":
         grad = opt.SG
     elif optimizer == "CVG":
@@ -23,8 +23,8 @@ def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, 
     n = data.shape[0]
     q = initial
     torch.set_grad_enabled(True)
-    g = grad(energy, q.requires_grad_(), param_ref)
-    E = energy(q, data)*n
+    g = grad(energy, q.requires_grad_(), param_ref) + 2*prior*q
+    E = energy(q, data)*n + prior*(q**2).sum(axis=1)
     # print (g)
     torch.set_grad_enabled(False)
     
@@ -39,12 +39,12 @@ def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, 
             q_new = (q_new.detach() + lr * p)
             
             torch.set_grad_enabled(True)
-            g_new = grad(energy, q.requires_grad_(), param_ref)
+            g_new = grad(energy, q.requires_grad_(), param_ref) + 2*prior*q
             torch.set_grad_enabled(False)
             
             p = p- lr * g_new.detach()/2.
 
-            E_new = energy(q_new, data)*n
+            E_new = energy(q_new, data)*n + prior*(q_new**2).sum(axis=1)
             H_new = 0.5*(p**2).sum(axis=1) + E_new
 
         
@@ -66,7 +66,9 @@ def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, 
             checkpoints += [q.clone().detach()]
         if _out%100 == 0:
             res = q.clone().detach().cpu().numpy()
-            print ("out_epoch: ", _out, " Covariance: ", np.linalg.inv(np.cov(res.T)))
+            # print ("out_epoch: ", _out, " Covariance: ", np.cov(res.T)*500)
+            print ("out_epoch: ", _out, " Mean: ", res.mean(axis=0))#, " mean energy: ", \
+            #  energy(q.clone().mean(axis=0).unsqueeze(0), data))
         
     torch.set_grad_enabled(True)
 
