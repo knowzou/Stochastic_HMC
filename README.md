@@ -1,5 +1,5 @@
-# Code for the ICML 2021 paper [On the Convergence of Hamiltonian Monte Carlo with Stochastic Gradient](https://proceedings.mlr.press/v139/zou21b.html) 
-
+# Stochastic HMC
+Code for the ICML 2021 paper [On the Convergence of Hamiltonian Monte Carlo with Stochastic Gradient](https://proceedings.mlr.press/v139/zou21b.html) 
 
 HMC with different types of stochastic gradients (mini-batch, control variates, SVRG, SAG)
 
