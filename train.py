@@ -58,12 +58,12 @@ def energy3(q, data):
     
     return all_energy
 
-if args.energy_func == "diff_var": ##################### different variance
+if args.energy_func == "diff_var": ##################### gaussian with different variance
     n, d = args.data_num, 1
     X = np.random.rand(n, d)*10+1
     energy = energy1
     initial = torch.zeros(args.sample_num,d).to(device)
-elif args.energy_func == "diff_covar": ##################### different covariance
+elif args.energy_func == "diff_covar": ##################### gaussian with different covariance
     d = 2
     X = np.ones([args.data_num, d, d])
     Y = np.asarray([[1, 0.7], [0.7, 1]])
@@ -71,12 +71,12 @@ elif args.energy_func == "diff_covar": ##################### different covarianc
         X[i, :, :] = Y + np.random.randn(d,d)
     energy = energy2
     initial = torch.zeros(args.sample_num,d).to(device)+1.5
-elif args.energy_func == "diff_mean": ##################### different mean
+elif args.energy_func == "diff_mean": ##################### gaussian with different mean
     if args.data_num == 500:
         X = np.load("data/syn500.npy")
     elif args.data_num == 5000:
         X = np.load("data/syn5000.npy")
-    initial = torch.from_numpy(X.mean(axis=0)).float().to(device).unsqueeze(0).repeat(args.sample_num,1)-1.5
+    initial = torch.from_numpy(X.mean(axis=0)).float().to(device).unsqueeze(0).repeat(args.sample_num,1)-1.5 # add drift to the groudtruth to generate initialization
 
     print (initial + 1.5)
 

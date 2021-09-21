@@ -89,7 +89,9 @@ if args.data_set == "Covtype":
     eta = 0.0001
     for _ in range(10000):
         beta = beta - eta*args.prior*2*beta  - eta*opt.SG(logistic, beta.requires_grad_(), True)
-    initial = beta.repeat(args.sample_num, 1) -0.05
+    true = beta.repeat(args.sample_num, 1)
+    
+    initial = true - 0.05
 
     print (initial)
 

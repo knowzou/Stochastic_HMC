@@ -6,12 +6,17 @@ from Optimizer import Gradient
 
 
 def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, optimizer, prior=0, enable_MH=True):
+    # initial = true - 0.05
+    # output MSE (only for gaussian data) and log-likelihood.
+
     checkpoints, output = [], []
+
     
     
     opt = Gradient(data, batch_size)
-    param_ref = initial.clone() + 0.0495
-    true_param = initial.clone().detach().cpu().numpy() + 0.05
+    param_ref = initial.clone() + 0.0495 # approximation of the ground truth
+
+    true_param = initial.clone().detach().cpu().numpy() + 0.05 # true parameter
     if optimizer == "SG":
         grad = opt.SG
     elif optimizer == "CVG":
@@ -73,9 +78,6 @@ def SGHMC(energy, data, batch_size, initial, out_epochs, in_epochs, lr, device, 
             checkpoints += [mse, likelihood]
         if _out%100 == 0:
             res = q.clone().detach().cpu().numpy()
-            # print ("out_epoch: ", _out, " Covariance: ", np.cov(res.T)*500)
-            # print ("out_epoch: ", _out, " Mean: ", res.mean(axis=0))#, " mean energy: ", \
-            #  energy(q.clone().mean(axis=0).unsqueeze(0), data))
             print ("out_epoch: ", _out, " MSE: ", mse, " Likelihood: ", likelihood)
         
     torch.set_grad_enabled(True)
