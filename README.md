@@ -33,7 +33,8 @@ python3 train_logistic.py --sample_num 10000 --data_set DATA_SET --data_num 500 
 ```batch_size```: mini-batch size
 ```optimizer```: SG/SVRG/SAG/CVG
 
-#######
+---
+
 For SAG (require to store the gradient of all samples for all examples), the sample num cannot be set to be too large due to the memory limit of GPU.
 
 ## Reference
