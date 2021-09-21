@@ -1,4 +1,6 @@
 # Stochastic_HMC
+Code for the ICML 2021 paper [On the Convergence of Hamiltonian Monte Carlo with Stochastic Gradient](https://proceedings.mlr.press/v139/zou21b.html) 
+
 HMC with different types of stochastic gradients (mini-batch, control variates, SVRG, SAG)
 
 Requirement: Cuda, pytorch, pandas
@@ -33,3 +35,16 @@ python3 train_logistic.py --sample_num 10000 --data_set DATA_SET --data_num 500 
 
 #######
 For SAG (require to store the gradient of all samples for all examples), the sample num cannot be set to be too large due to the memory limit of GPU.
+
+## Reference
+For more technical details, please refer to the [paper](http://proceedings.mlr.press/v139/zou21b/zou21b.pdf).
+```
+@inproceedings{zou2021convergence,
+  title={On the Convergence of Hamiltonian Monte Carlo with Stochastic Gradients},
+  author={Zou, Difan and Gu, Quanquan},
+  booktitle={International Conference on Machine Learning},
+  pages={13012--13022},
+  year={2021},
+  organization={PMLR}
+}
+``` 
